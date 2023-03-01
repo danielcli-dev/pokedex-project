@@ -10,17 +10,46 @@ let pokemonRepository = (function () {
     { name: "Pidgey", height: 0.3, types: ["flying", "normal"] },
   ];
 
+  // Function to add pokemon to pokemonList array
   function add(pokemon) {
     if (typeof pokemon === "object") pokemonList.push(pokemon);
   }
 
+  // Function to return current pokemonList array
   function getAll() {
     return pokemonList;
+  }
+
+  //Function to add list and button element to DOM
+  function addListItem(pokemon) {
+    let list = document.querySelector(".pokemon-list");
+
+    let listItem = document.createElement("li");
+
+    let button = document.createElement("button");
+
+    button.addEventListener("click", function (event) {
+      showDetails(pokemon);
+    });
+
+    button.innerText = pokemon.name;
+
+    button.classList.add("button");
+
+    listItem.appendChild(button);
+    list.appendChild(listItem);
+  }
+
+  // Function to console log object from button
+  function showDetails(pokemon) {
+    console.log(pokemon);
   }
 
   return {
     add: add,
     getAll: getAll,
+    addListItem: addListItem,
+    showDetails: showDetails,
   };
 })();
 
@@ -35,23 +64,5 @@ function divide(dividend, divisor) {
   }
 }
 
-// Function for printing array values
-function printArrayDetails(user) {
-  document.write(` <li>
-    ${user.name} ${
-    typeof user.height !== "undefined" ? `(height: ${user.height})` : ""}
-    
-   ${user.height > 1 ? "- Wow, that's big!" : ""}
-    </li>`);
-}
-
-// Replaced the for loop with forEach() function
-// pokemonRepository.getAll().forEach(printArrayDetails);
-
 pokemonRepository.add({ name: "Pikachu" });
-pokemonRepository.getAll().forEach(printArrayDetails);
-
-console.log(divide(4, 2));
-console.log(divide(7, 0));
-console.log(divide(1, 4));
-console.log(divide(12, -3));
+pokemonRepository.getAll().forEach(pokemonRepository.addListItem);
