@@ -1,15 +1,44 @@
 // Moved array into an IIFE with added functions
 
 let pokemonRepository = (function () {
-  let pokemonList = [
-    { name: "Bulbasaur", height: 0.7, types: ["grass", "poison"] },
-    { name: "Charmander", height: 1.7, types: ["fire"] },
-    { name: "Squirtle", height: 1, types: ["water"] },
-    { name: "Caterpie", height: 0.3, types: ["bug"] },
-    { name: "Weedle", height: 0.3, types: ["bug", "poison"] },
-    { name: "Pidgey", height: 0.3, types: ["flying", "normal"] },
-  ];
+  let pokemonList = [];
+  let apiUrl = "https://pokeapi.co/api/v2/pokemon/?limit=150";
 
+  function loadList() {
+    return fetch(apiUrl)
+      .then(function (response) {
+        return response.json();
+      })
+      .then(function (json) {
+        json.results.forEach(function (item) {
+          let pokemon = {
+            name: item.name,
+            detailsUrl: item.url,
+          };
+          add(pokemon);
+        });
+      })
+      .catch(function (e) {
+        console.error(e);
+      });
+  }
+
+  function loadDetails(item) {
+    let url = item.detailsUrl;
+    return fetch(url)
+      .then(function (response) {
+        return response.json();
+      })
+      .then(function (details) {
+        // Now we add the details to the item
+        item.imageUrl = details.sprites.front_default;
+        item.height = details.height;
+        item.types = details.types;
+      })
+      .catch(function (e) {
+        console.error(e);
+      });
+  }
   // Function to add pokemon to pokemonList array
   function add(pokemon) {
     if (typeof pokemon === "object") pokemonList.push(pokemon);
@@ -42,27 +71,23 @@ let pokemonRepository = (function () {
 
   // Function to console log object from button
   function showDetails(pokemon) {
-    console.log(pokemon);
+    loadDetails(pokemon).then(function () {
+      console.log(pokemon);
+    });
   }
 
   return {
     add: add,
     getAll: getAll,
+    loadList: loadList,
     addListItem: addListItem,
+    loadDetails: loadDetails,
     showDetails: showDetails,
   };
 })();
 
-// For loop to print name and height from pokemonList array
-
-function divide(dividend, divisor) {
-  if (divisor === 0) {
-    return "You're trying to divide by zero.";
-  } else {
-    let result = dividend / divisor;
-    return result;
-  }
-}
-
-pokemonRepository.add({ name: "Pikachu" });
-pokemonRepository.getAll().forEach(pokemonRepository.addListItem);
+pokemonRepository.loadList().then(function () {
+  pokemonRepository.getAll().forEach(function (pokemon) {
+    pokemonRepository.addListItem(pokemon);
+  });
+});
