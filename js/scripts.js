@@ -55,7 +55,7 @@ let pokemonRepository = (function () {
     let list = document.querySelector(".pokemon-list");
 
     let listItem = document.createElement("li");
-    listItem.classList.add("list-group-item", "border-0");
+    listItem.classList.add("list-group-item", "border-0", "pokemon");
     let button = document.createElement("button");
 
     button.addEventListener("click", function (event) {
@@ -70,10 +70,14 @@ let pokemonRepository = (function () {
     list.appendChild(listItem);
   }
 
+  function clearListItem() {
+    let removeItem = $(".pokemon");
+    removeItem.empty();
+    removeItem.remove();
+  }
   // Function to console log object from button
   function showDetails(pokemon) {
     loadDetails(pokemon).then(function () {
-      console.log(pokemon);
       showModal(pokemon.name, pokemon.height, pokemon.imageUrl);
     });
   }
@@ -101,14 +105,40 @@ let pokemonRepository = (function () {
     modal__body.append(contentElement);
   }
 
+  function filter() {
+    let filterIndex = document.querySelector(".filterIndex");
+    filterIndex.addEventListener("click", () => {
+      clearListItem();
+
+      pokemonList.forEach(function (pokemon) {
+        addListItem(pokemon);
+      });
+    });
+
+    let filterName = document.querySelector(".filterName");
+    filterName.addEventListener("click", () => {
+      clearListItem();
+
+      let pokemonListByName = pokemonList.slice();
+
+      pokemonListByName.sort((a, b) => a.name.localeCompare(b.name));
+      pokemonListByName.forEach(function (pokemon) {
+        addListItem(pokemon);
+      });
+
+    });
+  }
+
   return {
     add: add,
     getAll: getAll,
     loadList: loadList,
     addListItem: addListItem,
+    clearListItem: clearListItem,
     loadDetails: loadDetails,
     showDetails: showDetails,
     showModal: showModal,
+    filter: filter,
   };
 })();
 
@@ -116,4 +146,5 @@ pokemonRepository.loadList().then(function () {
   pokemonRepository.getAll().forEach(function (pokemon) {
     pokemonRepository.addListItem(pokemon);
   });
+  pokemonRepository.filter();
 });
