@@ -3,6 +3,8 @@
 let pokemonRepository = (function () {
   let pokemonList = [];
   let apiUrl = "https://pokeapi.co/api/v2/pokemon/?limit=150";
+  let filterType = "index";
+  let searchTerm = "";
 
   function loadList() {
     return fetch(apiUrl)
@@ -58,7 +60,7 @@ let pokemonRepository = (function () {
     listItem.classList.add("list-group-item", "border-0", "pokemon");
     let button = document.createElement("button");
 
-    button.addEventListener("click", function (event) {
+    button.addEventListener("click", function () {
       showDetails(pokemon);
     });
 
@@ -106,27 +108,55 @@ let pokemonRepository = (function () {
   }
 
   function filter() {
+    let searchInput = document.querySelector(".nav__input");
     let filterIndex = document.querySelector(".filterIndex");
-    filterIndex.addEventListener("click", () => {
-      clearListItem();
-
-      pokemonList.forEach(function (pokemon) {
-        addListItem(pokemon);
-      });
-    });
-
     let filterName = document.querySelector(".filterName");
-    filterName.addEventListener("click", () => {
-      clearListItem();
 
-      let pokemonListByName = pokemonList.slice();
-
-      pokemonListByName.sort((a, b) => a.name.localeCompare(b.name));
-      pokemonListByName.forEach(function (pokemon) {
-        addListItem(pokemon);
-      });
-
+    filterIndex.addEventListener("click", () => {
+      filterType = "index";
+      filterPokemon(searchTerm, filterType);
     });
+
+    filterName.addEventListener("click", () => {
+      filterType = "name";
+      filterPokemon(searchTerm, filterType);
+    });
+
+    searchInput.addEventListener("input", (e) => {
+      searchTerm = e.target.value;
+      filterPokemon(e.target.value, filterType);
+    });
+  }
+
+  function filterPokemon(value, filterType) {
+    clearListItem();
+
+    if (filterType == "index") {
+      getAll()
+        .filter((pokemon) => {
+          if (pokemon.name.includes(value)) {
+            return pokemon;
+          }
+        })
+        .forEach((pokemon) => {
+          addListItem(pokemon);
+        });
+    }
+
+    if (filterType == "name") {
+      let pokemonListFiltered = pokemonList.slice();
+      pokemonListFiltered
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .filter((pokemon) => {
+          if (pokemon.name.includes(value)) {
+            return pokemon;
+          }
+        })
+
+        .forEach(function (pokemon) {
+          addListItem(pokemon);
+        });
+    }
   }
 
   return {
@@ -139,6 +169,7 @@ let pokemonRepository = (function () {
     showDetails: showDetails,
     showModal: showModal,
     filter: filter,
+    filterPokemon: filterPokemon,
   };
 })();
 
